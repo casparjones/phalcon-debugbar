@@ -707,10 +707,10 @@ PROXY_CLASS;
                 ) {
                     $profiler->setDb($db);
                     if ($event->getType() == 'beforeQuery') {
-                        $sql = $db->getRealSQLStatement();
+                        $sql = $db->getRealSQLStatement() ?? $db->getSqlStatement();
                         $bindTypes = $db->getSQLBindTypes();
                         if (stripos(strtr($sql, [' ' => '']), 'SELECTIF(COUNT(*)>0,1,0)FROM`INFORMATION_SCHEMA`.`TABLES`') === false
-                            && stripos($sql, 'DESCRIBE') !== 0) {
+                            && stripos($sql, 'DESCRIBE') !== 0 && $sql !== null) {
                             $profiler->startProfile($sql, $params, $bindTypes);
                             if ($queryCollector->getFindSource()) {
                                 try {
@@ -722,9 +722,9 @@ PROXY_CLASS;
                         }
                     }
                     if ($event->getType() == 'afterQuery') {
-                        $sql = $db->getRealSQLStatement();
+                        $sql = $db->getRealSQLStatement() ?? $db->getSqlStatement();
                         if (stripos(strtr($sql, [' ' => '']), 'SELECTIF(COUNT(*)>0,1,0)FROM`INFORMATION_SCHEMA`.`TABLES`') === false
-                            && stripos($sql, 'DESCRIBE') !== 0) {
+                            && stripos($sql, 'DESCRIBE') !== 0 && $sql !== null) {
                             $profiler->stopProfile();
                         }
                     }
