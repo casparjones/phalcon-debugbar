@@ -9,41 +9,39 @@
 namespace Snowair\Debugbar\Storage;
 
 use DebugBar\Storage\StorageInterface;
-use Elasticsearch\Client;
 
 use Elasticsearch\ClientBuilder;
 
-
 class ElasticSearch implements StorageInterface
 {
-
     protected $client;
     protected $di;
     protected $sid;
     protected $config;
 
-    public function __construct( $di, $config  )
+    public function __construct($di, $config)
     {
         $this->config = $config;
 
-        if ( !$di['session']->isStarted() ) {
+        if (!$di['session']->isStarted()) {
             $di['session']->start();
         }
-        $this->sid = $di['session']->getId();;
+        $this->sid = $di['session']->getId();
+        ;
 
         $factory = ClientBuilder::create();
 
-        if($config->hosts){
+        if($config->hosts) {
             $factory->setHosts((array)$config->hosts);
         }
 
-        if($config->ssl->key && $config->ssl->cert && $config->ssl->verify){
+        if($config->ssl->key && $config->ssl->cert && $config->ssl->verify) {
             $factory->setSSLKey($config->ssl->key);
             $factory->setSSLCert($config->ssl->cert);
             $factory->setSSLVerification($config->ssl->verify);
         }
 
-        if($config->connection_params){
+        if($config->connection_params) {
             $factory->setConnectionParams((array)$config->connection_params);
         }
 
@@ -56,7 +54,7 @@ class ElasticSearch implements StorageInterface
      * @param string $id
      * @param string $data
      */
-    function save( $id, $data )
+    public function save($id, $data)
     {
         $data['__meta']['sid'] = $this->sid;
 
@@ -77,7 +75,7 @@ class ElasticSearch implements StorageInterface
      *
      * @return array
      */
-    function get( $id )
+    public function get($id)
     {
         $params = [
             'index' => $this->config->index,
@@ -98,12 +96,12 @@ class ElasticSearch implements StorageInterface
      *
      * @return array
      */
-    function find( array $filters = array(), $max = 20, $offset = 0 )
+    public function find(array $filters = array(), $max = 20, $offset = 0)
     {
         $index['index'] = $this->config->index;
         $index['type'] = $this->config->type;
-        $index['body']['query']['bool']['must']= [
-            ['match_phrase'=>[ '__meta.sid'=>$this->sid, ]]
+        $index['body']['query']['bool']['must'] = [
+            ['match_phrase' => [ '__meta.sid' => $this->sid, ]]
         ];
 
         if (isset($filters['method'])) {
@@ -133,12 +131,12 @@ class ElasticSearch implements StorageInterface
     /**
      * Clears all the collected data
      */
-    function clear()
+    public function clear()
     {
         $index['index'] = $this->config->index;
         $index['type'] = $this->config->type;
-        $index['body']['query']['bool']['must']= [
-            ['match_phrase'=>[ '__meta.sid'=>$this->sid, ]]
+        $index['body']['query']['bool']['must'] = [
+            ['match_phrase' => [ '__meta.sid' => $this->sid, ]]
         ];
         $this->client->deleteByQuery($index);
     }

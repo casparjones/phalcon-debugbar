@@ -6,12 +6,13 @@
  */
 
 namespace Snowair\Debugbar\Whoops;
+
 /**
  * Whoops - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-use Phalcon\DI;
+use Phalcon\DI\DI;
 use Phalcon\DI\Exception;
 use Phalcon\Dispatcher\DispatcherInterface;
 use Whoops\Handler\JsonResponseHandler;

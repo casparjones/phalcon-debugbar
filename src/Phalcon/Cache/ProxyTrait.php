@@ -8,7 +8,7 @@
 namespace Snowair\Debugbar\Phalcon\Cache;
 
 use Phalcon\Cache\Adapter\AdapterInterface as CacheAdapterInterface;
-use Phalcon\Exception;
+use Phalcon\Support\Exception;
 use Phalcon\Storage\Serializer\Base64;
 use Phalcon\Storage\Serializer\Msgpack;
 use ReflectionClass;

@@ -7,23 +7,24 @@
 
 namespace Snowair\Debugbar\Phalcon\View;
 
-use Phalcon\DI;
+use Phalcon\DI\Di;
 
-class VoltFunctions {
+class VoltFunctions
+{
+    protected $di;
 
-	protected $di;
+    public function __construct($di)
+    {
+        $this->di = $di;
+    }
 
-	public function __construct($di ){
-		$this->di = $di;
-	}
-
-	public function compileFunction( $name, $arguments, $funcArguments ) {
-		$di = $this->di;
-		if ( $di->has( 'debugbar' ) ) {
-			if ( method_exists( '\PhalconDebug', $name ) )
-			{
-				return "\\PhalconDebug::$name($arguments)";
-			}
-		}
-	}
+    public function compileFunction($name, $arguments, $funcArguments)
+    {
+        $di = $this->di;
+        if ($di->has('debugbar')) {
+            if (method_exists('\PhalconDebug', $name)) {
+                return "\\PhalconDebug::$name($arguments)";
+            }
+        }
+    }
 }

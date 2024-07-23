@@ -8,7 +8,6 @@
 namespace Snowair\Debugbar\Storage;
 
 use DebugBar\Storage\StorageInterface;
-use Phalcon\Exception;
 
 class MongoDB implements StorageInterface
 {
@@ -21,7 +20,8 @@ class MongoDB implements StorageInterface
         if (!$di['session']->isStarted()) {
             $di['session']->start();
         }
-        $this->sid = $di['session']->getId();;
+        $this->sid = $di['session']->getId();
+        ;
         $client = new \MongoDB\Client($connection, (array)$options, (array)$dirveropts);
         $this->collection = $client->{$db}->{$collection};
     }
@@ -32,7 +32,7 @@ class MongoDB implements StorageInterface
      * @param string $id
      * @param array  $data
      */
-    function save($id, $data)
+    public function save($id, $data)
     {
         $data['_id'] = $id;
         $data['__meta']['sid'] = $this->sid;
@@ -46,7 +46,7 @@ class MongoDB implements StorageInterface
      *
      * @return array
      */
-    function get($id)
+    public function get($id)
     {
         return (array)$this->collection->findOne(array('_id' => $id));
     }
@@ -60,7 +60,7 @@ class MongoDB implements StorageInterface
      *
      * @return array
      */
-    function find(array $filters = array(), $max = 20, $offset = 0)
+    public function find(array $filters = array(), $max = 20, $offset = 0)
     {
         $criteria = [
             '$and' => [
@@ -82,7 +82,8 @@ class MongoDB implements StorageInterface
                 'skip'  => (int)$offset,
                 'limit' => (int)$max,
                 'sort'  => ['__meta.utime' => -1],
-            ]);
+            ]
+        );
         $array = iterator_to_array($iterator);
         $result = array();
         foreach ($array as $value) {
@@ -97,7 +98,7 @@ class MongoDB implements StorageInterface
     /**
      * Clears all the collected data
      */
-    function clear()
+    public function clear()
     {
         $this->collection->deleteMany(['__meta.sid' => $this->sid]);
     }

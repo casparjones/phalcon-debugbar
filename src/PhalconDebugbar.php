@@ -17,16 +17,16 @@ use DebugBar\DataCollector\RequestDataCollector;
 use DebugBar\DataCollector\TimeDataCollector;
 use DebugBar\DebugBar;
 use Exception;
-use Phalcon\DI;
+use Phalcon\DI\Di;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
 use Phalcon\Mvc\View\Engine\Volt;
 use Phalcon\Mvc\View\Simple;
-use Phalcon\Registry;
+use Phalcon\Support\Registry;
 use Phalcon\Storage\Adapter\AbstractAdapter as AbstractStorageAdapter;
-use Phalcon\Version;
+use Phalcon\Support\Version;
 use Snowair\Debugbar\DataCollector\CacheCollector;
 use Snowair\Debugbar\DataCollector\ConfigCollector;
 use Snowair\Debugbar\DataCollector\LogsCollector;
@@ -58,7 +58,6 @@ use Snowair\Debugbar\Storage\MongoDB;
  */
 class PhalconDebugbar extends DebugBar
 {
-
     /**
      * @var  DI $di
      */
@@ -172,7 +171,8 @@ class PhalconDebugbar extends DebugBar
             }
         }
         if ($this->shouldCollect('log', false) && $this->di->has('log')) {
-            $logs = new LogsCollector($this->di,
+            $logs = new LogsCollector(
+                $this->di,
                 $this->config->options->log->get('aggregate', false),
                 $this->config->options->log->get('formatter', 'line')
             );
@@ -327,8 +327,8 @@ PROXY_CLASS;
                 if (class_exists('\Swifit_Mailer') && ($mailer instanceof \Swift_Mailer)) {
                     $this->addCollector(new SwiftMailCollector($mailer));
                     if ($this->config->options->mail->get('full_log', false) and $this->hasCollector(
-                            'messages'
-                        )
+                        'messages'
+                    )
                     ) {
                         $this['messages']->aggregate(new SwiftLogCollector($mailer));
                     }
@@ -336,7 +336,9 @@ PROXY_CLASS;
             } catch (\Exception $e) {
                 $this->addException(
                     new Exception(
-                        'Cannot add MailCollector to Phalcon Debugbar: ' . $e->getMessage(), $e->getCode(), $e
+                        'Cannot add MailCollector to Phalcon Debugbar: ' . $e->getMessage(),
+                        $e->getCode(),
+                        $e
                     )
                 );
             }
@@ -407,7 +409,7 @@ PROXY_CLASS;
         });
         $eventsManager->attach('view:beforeRenderView', function ($event, $view) use ($viewProfiler) {
             $viewFilePath = $view->getActiveRenderPath();
-            if (Version::getId() >= 2000140) {
+            if (Version::getId() >= 5000000) {
                 if (!$view instanceof \Phalcon\Mvc\ViewInterface && $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
                     $viewFilePath = realpath($view->getViewsDir()) . DIRECTORY_SEPARATOR . $viewFilePath;
                 }
@@ -421,7 +423,7 @@ PROXY_CLASS;
         });
         $eventsManager->attach('view:afterRenderView', function ($event, $view) use ($viewProfiler) {
             $viewFilePath = $view->getActiveRenderPath();
-            if (Version::getId() >= 2000140) {
+            if (Version::getId() >= 5000000) {
                 if (!$view instanceof \Phalcon\Mvc\ViewInterface && $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
                     $viewFilePath = realpath($view->getViewsDir()) . DIRECTORY_SEPARATOR . $viewFilePath;
                 }
@@ -931,4 +933,3 @@ PROXY_CLASS;
     }
 
 }
-
