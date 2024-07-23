@@ -409,7 +409,7 @@ PROXY_CLASS;
         });
         $eventsManager->attach('view:beforeRenderView', function ($event, $view) use ($viewProfiler) {
             $viewFilePath = $view->getActiveRenderPath();
-            if (Version::getId() >= 5000000) {
+            if ((new Version())->getId() >= 5000000) {
                 if (!$view instanceof \Phalcon\Mvc\ViewInterface && $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
                     $viewFilePath = realpath($view->getViewsDir()) . DIRECTORY_SEPARATOR . $viewFilePath;
                 }
@@ -423,7 +423,7 @@ PROXY_CLASS;
         });
         $eventsManager->attach('view:afterRenderView', function ($event, $view) use ($viewProfiler) {
             $viewFilePath = $view->getActiveRenderPath();
-            if (Version::getId() >= 5000000) {
+            if ((new Version())->getId() >= 5000000) {
                 if (!$view instanceof \Phalcon\Mvc\ViewInterface && $view instanceof \Phalcon\Mvc\ViewBaseInterface) {
                     $viewFilePath = realpath($view->getViewsDir()) . DIRECTORY_SEPARATOR . $viewFilePath;
                 }

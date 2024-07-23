@@ -35,7 +35,7 @@ class Debugbar extends Adapter implements AdapterInterface
 
     public function log($type, $message = null, array $context = null)
     {
-        if (Version::getId() < '5000000') {
+        if ((new Version())->getId() < '5000000') {
             $this->logInternal($type, $message, microtime(true), $context);
         } else {
             $this->logInternal($message, $type, microtime(true), $context);

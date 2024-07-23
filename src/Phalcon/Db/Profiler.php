@@ -8,23 +8,25 @@
 namespace Snowair\Debugbar\Phalcon\Db;
 
 use Phalcon\Db\Adapter\AdapterInterface as Adapter;
-use Phalcon\Support\Version;
 use Phalcon\Db\Column;
 use Phalcon\Db\Profiler as PhalconProfiler;
+use Phalcon\Support\Version;
 use Snowair\Debugbar\Phalcon\Db\Profiler\Item;
 
 class Profiler extends PhalconProfiler
 {
-    protected $_failedProfiles = array();
+    protected $_failedProfiles = [];
     protected $_stoped = false;
     protected $_lastFailed;
     protected $_explainQuery = false;
+
     /**
-     * @var  Item $activeProfile
+     * @var  Item
      */
     protected $_activeProfile;
+
     /**
-     * @var Adapter  $_db
+     * @var Adapter
      */
     protected $_db;
 
@@ -34,11 +36,11 @@ class Profiler extends PhalconProfiler
         if (!$this->_stoped && $latest) {
             if ($this->_db) {
                 $pdo = $this->_db->getInternalHandler();
-                $latest->setExtra(array(
+                $latest->setExtra([
                     'err_code' => $pdo->errorCode(),
                     'err_msg' => $pdo->errorInfo(),
                     'connection' => $this->getConnectionInfo(),
-                ));
+                ]);
             }
             $this->_lastFailed = $latest;
             $this->_failedProfiles[] = $latest;
@@ -48,15 +50,15 @@ class Profiler extends PhalconProfiler
     public function getConnectionInfo()
     {
         $info = $this->_db->getDescriptor();
-        if(empty($info['host'])) {
+        if (empty($info['host'])) {
             return $info['dbname'];
-        } elseif (isset($info['host']) && isset($info['port']) && !in_array($info['port'], array(3306,1521,5432,1433))) {
+        } elseif (isset($info['host']) && isset($info['port']) && !in_array($info['port'], [3306, 1521, 5432, 1433])) {
             $info['host'] .= ':'.$info['port'];
         }
         if (isset($info['dbname'])) {
-            return $info['host'] . '/' . $info['dbname'];
+            return $info['host'].'/'.$info['dbname'];
         } else {
-            return $info['host'] ;
+            return $info['host'];
         }
     }
 
@@ -74,7 +76,7 @@ class Profiler extends PhalconProfiler
         $this->handleFailed();
         $activeProfile = new Item();
 
-        if(!$sqlVariables) {
+        if (!$sqlVariables) {
             $sqlVariables = $this->_db->getSqlVariables();
         }
 
@@ -91,14 +93,14 @@ class Profiler extends PhalconProfiler
 
         $activeProfile->setInitialTime(microtime(true));
 
-        if (method_exists($this, "beforeStartProfile")) {
+        if (method_exists($this, 'beforeStartProfile')) {
             $this->beforeStartProfile($activeProfile);
         }
 
         $this->_activeProfile = $activeProfile;
 
-
         $this->_stoped = false;
+
         return $this;
     }
 
@@ -108,10 +110,10 @@ class Profiler extends PhalconProfiler
             return $sql;
         }
         $pdo = $this->_db->getInternalHandler();
-        $indexes = array();
-        $keys    = array();
+        $indexes = [];
+        $keys = [];
         foreach ($variables as $key => $value) {
-            if (is_array($value) && Version::getId() >= 5000000) {
+            if (is_array($value) && (new Version())->getId() >= 5000000) {
                 foreach ($value as $k => $v) {
                     $keys[':'.$key.$k] = $pdo->quote($v);
                 }
@@ -132,7 +134,7 @@ class Profiler extends PhalconProfiler
         }
         $splited = preg_split('/(?=\?)|(?<=\?)/', $sql);
 
-        $result = array();
+        $result = [];
         foreach ($splited as $key => $value) {
             if ($value == '?') {
                 $result[$key] = array_shift($indexes);
@@ -142,6 +144,7 @@ class Profiler extends PhalconProfiler
         }
         $result = implode(' ', $result);
         $result = strtr($result, $keys);
+
         return $result;
     }
 
@@ -154,7 +157,7 @@ class Profiler extends PhalconProfiler
             case Column::BIND_SKIP:
                 break;
             case Column::BIND_PARAM_INT:
-                $value = (int)$value;
+                $value = (int) $value;
                 break;
             case Column::BIND_PARAM_NULL:
                 $value = 'null';
@@ -165,6 +168,7 @@ class Profiler extends PhalconProfiler
             default:
                 $value = $pdo->quote($value);
         }
+
         return $value;
     }
 
@@ -177,33 +181,35 @@ class Profiler extends PhalconProfiler
     {
         $finalTime = microtime(true);
         $activeProfile = $this->_activeProfile;
+        if ($activeProfile === null) {
+            return $this;
+        }
         $activeProfile->setFinalTime($finalTime);
 
         $initialTime = $activeProfile->getInitialTime();
 
-        if(!isset($this->totalSeconds)) {
+        if (!isset($this->totalSeconds)) {
             $this->totalSeconds = 0;
         }
 
         $this->totalSeconds = $this->totalSeconds + ($finalTime - $initialTime);
 
         if ($this->_db) {
-            $pdo  = $this->_db->getInternalHandler();
-            $sql  = $activeProfile->getSQLStatement();
-            $data = array( 'last_insert_id' => 0, 'affect_rows' => 0 );
+            $pdo = $this->_db->getInternalHandler();
+            $sql = $activeProfile->getSQLStatement();
+            $data = ['last_insert_id' => 0, 'affect_rows' => 0];
             $data['connection'] = $this->getConnectionInfo();
             if (stripos($sql, 'INSERT') === 0) {
-                $data['last_insert_id'] =  $pdo->lastInsertId();
+                $data['last_insert_id'] = $pdo->lastInsertId();
             }
-            if (stripos($sql, 'INSERT') === 0  || stripos($sql, 'UPDATE') === 0 || stripos($sql, 'DELETE') === 0) {
-                $data['affect_rows'] =  $this->_db->affectedRows();
+            if (stripos($sql, 'INSERT') === 0 || stripos($sql, 'UPDATE') === 0 || stripos($sql, 'DELETE') === 0) {
+                $data['affect_rows'] = $this->_db->affectedRows();
             }
             if (stripos($sql, 'SELECT') === 0 && $this->_explainQuery) {
                 try {
                     $stmt = $pdo->query('explain '.$activeProfile->getRealSQL());
                     $data['explain'] = $stmt->fetchAll(\PDO::FETCH_CLASS);
                 } catch (\Exception $e) {
-
                 }
             }
             $activeProfile->setExtra($data);
@@ -211,11 +217,12 @@ class Profiler extends PhalconProfiler
 
         $this->allProfiles[] = $activeProfile;
 
-        if (method_exists($this, "afterEndProfile")) {
+        if (method_exists($this, 'afterEndProfile')) {
             $this->afterEndProfile($activeProfile);
         }
 
         $this->_stoped = true;
+
         return $this;
     }
 
@@ -245,14 +252,14 @@ class Profiler extends PhalconProfiler
 
     public function setSource($source)
     {
-        $this->_activeProfile->setExtra(array('source' => $source));
+        $this->_activeProfile->setExtra(['source' => $source]);
     }
 
     /**
-     * @param boolean $explainQuery
+     * @param bool $explainQuery
      */
     public function setExplainQuery($explainQuery)
     {
-        $this->_explainQuery = (bool)$explainQuery;
+        $this->_explainQuery = (bool) $explainQuery;
     }
 }

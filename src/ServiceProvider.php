@@ -79,7 +79,7 @@ class ServiceProvider extends Injectable
         }, true);
 
         $this->di->set('debugbar', function () {
-            $di = (Version::getId() > 5000000) ? $this : $this->di;
+            $di = ((new Version())->getId() > 5000000) ? $this : $this->di;
             $debugbar = new PhalconDebugbar($di);
             $debugbar->setHttpDriver(new PhalconHttpDriver());
             return $debugbar;

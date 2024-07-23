@@ -10,8 +10,8 @@ namespace Snowair\Debugbar;
 use DebugBar\DebugBar;
 use DebugBar\JavascriptRenderer;
 use Phalcon\DI\Di;
-use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\Application;
+use Phalcon\Mvc\Dispatcher;
 
 class JsRender extends JavascriptRenderer
 {
@@ -19,14 +19,14 @@ class JsRender extends JavascriptRenderer
     protected $ajaxHandlerBindToXHR = true;
     protected $url;
 
-
     public function __construct(DebugBar $debugBar, $baseUrl = null, $basePath = null)
     {
         parent::__construct($debugBar, $baseUrl, $basePath);
 
-        $this->cssFiles['laravel'] = __DIR__ . '/Resources/laravel-debugbar.css';
-        $this->cssVendors['fontawesome'] = __DIR__ . '/Resources/font-awesome/style.css';
+        $this->cssFiles['laravel'] = __DIR__.'/Resources/laravel-debugbar.css';
+        $this->cssVendors['fontawesome'] = __DIR__.'/Resources/font-awesome/style.css';
     }
+
     /**
      * Set the URL Generator
      */
@@ -49,10 +49,10 @@ class JsRender extends JavascriptRenderer
         if ($app instanceof Application) {
             $dispatcher = $di['dispatcher'];
             $m = $dispatcher->getModuleName();
-            if(!$m) {
+            if (!$m) {
                 $m = $di['request']->get('m');
             }
-            if(!$m) {
+            if (!$m) {
                 $m = $app->getDefaultModule();
             }
         } else {
@@ -60,19 +60,22 @@ class JsRender extends JavascriptRenderer
         }
 
         $baseuri = rtrim($this->url->getBasePath(), '/').'/';
+        if ($baseuri == '/') {
+            $baseuri = '';
+        }
         $html .= sprintf(
-            '<link rel="stylesheet" type="text/css" href="%s?m='.$m.'&%s">' . "\n",
-            $baseuri.ltrim($this->url->getStatic(array('for' => 'debugbar.assets.css')), '/'),
+            '<link rel="stylesheet" type="text/css" href="%s?m='.$m.'&%s">'."\n",
+            $baseuri.ltrim($this->url->getStatic(['for' => 'debugbar.assets.css']), '/'),
             $time
         );
         $html .= sprintf(
-            '<script type="text/javascript" src="%s?m='.$m.'&%s"></script>' . "\n",
-            $baseuri.ltrim($this->url->getStatic(array('for' => 'debugbar.assets.js')), '/'),
+            '<script type="text/javascript" src="%s?m='.$m.'&%s"></script>'."\n",
+            $baseuri.ltrim($this->url->getStatic(['for' => 'debugbar.assets.js']), '/'),
             $time
         );
 
         if ($this->isJqueryNoConflictEnabled()) {
-            $html .= '<script type="text/javascript">jQuery.noConflict(true);</script>' . "\n";
+            $html .= '<script type="text/javascript">jQuery.noConflict(true);</script>'."\n";
         }
 
         // reset base uri to its default
@@ -92,7 +95,7 @@ class JsRender extends JavascriptRenderer
 
         $content = '';
         foreach ($files as $file) {
-            $content .= file_get_contents($file) . "\n";
+            $content .= file_get_contents($file)."\n";
         }
 
         return $content;
