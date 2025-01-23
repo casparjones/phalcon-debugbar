@@ -13,7 +13,7 @@ use DebugBar\DataCollector\Renderable;
 use Phalcon\DI\DiInterface;
 use Phalcon\Http\Request;
 use Phalcon\Http\Response;
-use Phalcon\Suppoert\Version;
+use Phalcon\Support\Version;
 
 class PhalconRequestCollector extends DataCollector implements DataCollectorInterface, Renderable
 {
