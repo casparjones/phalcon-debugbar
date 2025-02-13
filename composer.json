@@ -1,5 +1,5 @@
 {
-    "name": "marcuspmd/phalcon-debugbar",
+    "name": "casparjones/phalcon-debugbar",
     "description": "Integrates PHP Debug Bar with Phalcon.",
     "type": "library",
     "keywords": ["phalcon", "debugbar", "profiler", "debug", "webprofiler"],
